@@ -22,6 +22,13 @@ import login from './components/account/login.vue';
 // 商品相关的组件
 import goodslist from './components/goods/goodslist.vue';
 
+//导入axios
+import axios from 'axios';
+//设置默认请求域名
+axios.defaults.baseURL='http://127.0.0.1:8899';
+//把axios对象绑定到Vue的原型属性$ajsx上，将来直接通过this.$ajax发送请求
+Vue.prototype.$ajax=axios;
+
 // 3.0.2 实例化对象并且定义路由规则
 var router = new VueRouter({
     routes:[

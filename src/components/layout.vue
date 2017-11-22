@@ -11,7 +11,9 @@
                                 <i class="el-icon-message"></i>购物商城
                             </template>
                             <el-menu-item-group>
-                                <el-menu-item index="1-1">内容管理</el-menu-item>
+                                <router-link to="/admin/goodslist">
+                                    <el-menu-item index="1-1">内容管理</el-menu-item>
+                                </router-link>    
                                 <el-menu-item index="1-2">分类管理</el-menu-item>
                                 <el-menu-item index="1-3">评论管理</el-menu-item>
                             </el-menu-item-group>
@@ -42,7 +44,7 @@
                                 </el-col>
                                 <!-- 右边登陆导航 -->
                                 <el-col :span="23">
-                                    欢迎登陆
+                                    欢迎【xxx】登陆
                                     <el-dropdown>
                                         <span class="el-dropdown-link">
                                             更多菜单
@@ -63,7 +65,6 @@
                 <el-row>
                     <!-- 3.0 其他功能的渲染区 -->
                     <el-col :span="24">
-                        其他功能的渲染区占位符
                         <router-view></router-view>
                     </el-col>
                 </el-row>

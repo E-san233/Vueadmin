@@ -23133,6 +23133,9 @@
 #layout_logo{
   width: 100%;
 }
+.bt-line{
+  padding:10px 10px;
+}
 :root {
     /* Transition
   -------------------------- */
