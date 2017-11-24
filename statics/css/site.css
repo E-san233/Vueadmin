@@ -141,3 +141,28 @@ text-decoration: none;
 .el-upload-list.el-upload-list--picture{
    margin-right: 10px;
 }
+.ql-container  .ql-editor {
+    min-height: 20em;
+    padding-bottom: 1em;
+    max-height: 25em;
+}
+#logintmpl{
+    width: 280px;
+    height: 180px;
+    background-color: #267cb7;
+    margin: 150px auto;
+    border-radius: 5px;
+    padding: 10px 30px
+}
+#logintmpl li{
+    text-align: center;
+    list-style: none;
+    line-height: 60px;
+    color: #fff;
+}
+#logintmpl li input{
+    height: 25px;
+    width: 200px;
+    border-radius: 3px;
+    border:none;
+}

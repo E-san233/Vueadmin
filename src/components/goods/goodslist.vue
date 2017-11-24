@@ -16,13 +16,19 @@
                 <div class="abread bt-line">
                     <el-row>
                         <el-col :span="6">
-                            <el-button size="small"><i class="el-icon-plus"></i> 全选</el-button>
-                            <el-button size="small"><i class="el-icon-check"></i> 新增</el-button>
-                            <el-button size="small"><i class="el-icon-delete"></i> 删除</el-button>
+                            <el-button size="small" @click="selectedAll(list)">
+                                <i class="el-icon-check"></i> {{seletxt}}</span></el-button>
+
+                            <router-link to="/admin/goodsadd">
+                                <el-button size="small">
+                                    <i class="el-icon-plus"></i> 新增</el-button>
+                            </router-link>
+                            <el-button size="small" @click="delData">
+                                <i class="el-icon-delete"></i> 删除</el-button>
                         </el-col>
                         <!-- 搜索框 -->
                         <el-col :offset="14" :span="4">
-                            <el-input @keydown.13='getlist' placeholder="请输入搜索内容" icon="search" v-model="searchValue" :on-icon-click="getlist"></el-input>
+                            <el-input @keyup.enter.native="getlist" placeholder="请输入搜索内容" icon="search" v-model="searchValue" :on-icon-click="getlist"></el-input>
                         </el-col>
                     </el-row>
                 </div>
@@ -32,11 +38,22 @@
         <!-- 列表 -->
         <el-row>
             <el-col :span="24">
-                <el-table ref="multipleTable" :data="list" border tooltip-effect="dark" style="width: 100%" @selection-change="handleSelectionChange">
+                <el-table ref="multipleTable" :data="list" @select="selected" @select-all="selectedAll" border tooltip-effect="dark" style="width: 100%">
+                    <!-- 勾选框 -->
                     <el-table-column type="selection" width="55">
                     </el-table-column>
-                    <el-table-column prop="title" label="标题">
+                    <el-table-column label="标题">
+                        <template scope="scope">
+                            <el-tooltip class="item" effect="dark" placement="right-start">
+                                <div slot='content'>
+                                    <img :src="scope.row.imgurl" height="150" width="150" alt="">
+                                </div>
+                                <router-link v-bind="{to:'/admin/goodsedit/'+scope.row.id}">{{scope.row.title}}</router-link>
+                            </el-tooltip>
+                        </template>
                     </el-table-column>
+
+
                     <el-table-column prop="categoryname" label="所属类别" width="100">
                     </el-table-column>
                     <el-table-column prop="stock_quantity" label="库存" width="100">
@@ -47,13 +64,13 @@
                     </el-table-column>
                     <el-table-column label="属性" width="120">
                         <template scope="scope">
-                            <i v-bind="{class:'el-icon-picture '+(scope.row.is_slide==1?'':'unlight')}" ></i>
+                            <i v-bind="{class:'el-icon-picture '+(scope.row.is_slide==1?'':'unlight')}"></i>
                             <i v-bind="{class:'el-icon-upload '+(scope.row.is_top==1?'':'unlight')}"></i>
                         </template>
                     </el-table-column>
                     <el-table-column label="操作" width="120">
                         <template scope="scope">
-                            <a href="#">修改</a>
+                            <router-link v-bind="{to:'/admin/goodsedit/'+scope.row.id}">修改</router-link>
                         </template>
                     </el-table-column>
                 </el-table>
@@ -76,6 +93,9 @@
     export default {
         data() {
             return {
+                seletxt:"全选",
+                isSelectAll: false,
+                delist: [],
                 // 默认页索引
                 pageIndex: 1,
                 // 默认页容量
@@ -83,15 +103,75 @@
                 // api返回的数据总行数
                 totalCount: 0,
                 searchValue: '',
-                list: []//存放商品数据数组
+                list: [],//存放商品数据数组
+
+
             }
         },
         methods: {
+            delData() {
+                console.log(this.delist);
+                if (this.delist.length <= 0) {
+                    this.$message.error("请选择输入一条数据")
+                    return;
+                }
+                var ids = this.delist.join(',')
+                var url = "/admin/goods/del/" + ids;
+                this.$ajax.get(url)
+                    .then(res => {
+                        if (res.data.status == 1) {
+                            this.$message({
+                                showClose: true,
+                                message: res.data.message,
+                                type: 'error'
+                            })
+                        } else {
+                            this.getlist()
+                        }
+                    })
+
+            },
+
+            //全选方法
+            selectedAll(rows) {
+                // console.log(this.delist);
+                this.isSelectAll = !this.isSelectAll;
+
+                //ture为全选
+                if (this.isSelectAll) {
+                    this.delist.lenght = 0;
+                    //遍历row数组，把row添加到delist中
+                    rows.forEach(row => {
+                        this.$refs.multipleTable.toggleRowSelection(row);
+                        this.delist.push(row.id);
+                        this.seletxt="反选";
+                    })
+                    // console.log(this.delist);
+                } else {
+                    rows.forEach(row => {
+                        //反选
+                        this.$refs.multipleTable.toggleRowSelection(row);
+                        this.seletxt="全选";
+                    })
+                    //清空
+                    this.delist = [];
+                }
+                
+            },
+
+            //勾选表格时触发
+            selected(selection, row) {
+                this.delist.push(row.id);
+                console.log(this.delist);
+            },
+
             //页索引
             pageIndexChang(currentPage) {
                 this.pageIndex = currentPage;
                 this.getlist();
+
             },
+
             //当前的页容量
             pageSizeChange(size) {
                 // console.log(size);
@@ -101,21 +181,26 @@
             },
             //发送axios发送ajax请求
             getlist() {
+
+                this.list = [];
                 var url = '/admin/goods/getlist?pageIndex=' + this.pageIndex + '&pageSize=' + this.pageSize + '&searchvalue=' + this.searchValue;
+
                 this.$ajax.get(url)
                     .then(res => {
                         this.list = res.data.message;
+
                         this.totalCount = res.data.totalcount;
                     })
             },
         },
         mounted() {
             this.getlist()
+
         }
     }
 </script>
 <style scoped>
-    .unlight{
+    .unlight {
         color: rgba(0, 0, 0, 0.3)
     }
 </style>
